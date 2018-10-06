@@ -5,20 +5,21 @@
 
 int main() {
     printf("--{ Hello }------------------\n");
-    int* p = mmalloc(200);
 
-    *p = 83593845;
+    int* p = mmalloc(sizeof(int));
+    int* q = mmalloc(sizeof(int));
 
-    int* r = mmalloc(sizeof(int));
-
-    *r = 16;
-
-    mem_audit();
+    printf("p : %p\n", p);
+    printf("q : %p\n", q); // should end in 30
+    // printf("r : %p\n", r);
 
     mfree(p);
-    mfree(r);
+    // mfree(q);
+    // mfree(r);
 
     // mem_audit();
+
+    printf("----------------{ Goodbye }--\n");
 
     return 0;
 }

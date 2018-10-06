@@ -42,6 +42,7 @@ void* mmalloc(const size_t bytes);
 void mfree(const void* ptr);
 
 void mem_audit();
+void __walk_free();
 
 struct __node_t* __find_free(size_t bytes);
 
