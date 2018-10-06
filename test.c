@@ -18,7 +18,7 @@ int main() {
     mfree(p);
     mfree(r);
 
-    mem_audit();
+    // mem_audit();
 
     return 0;
 }

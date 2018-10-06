@@ -23,7 +23,7 @@ void* mmalloc(const size_t bytes) {
         // Get a header object and return its address
         // It gets a 1024 byte page meaning we need to split it...
         void* ptr;
-        if ((ptr = sbrk(HSZ + real)) == (void*)(-1)) {
+        if ((ptr = sbrk(1024)) == (void*)(-1)) {
             fprintf(stderr, "[-] Couldn't allocate memory.\n");
             return NULL;
         }
@@ -34,18 +34,34 @@ void* mmalloc(const size_t bytes) {
         chunk->size  = real;
         chunk->magic = NONFREE;
 
-        // printf("   -- %p\n", chunk);
+        struct __node_t* remain = ((void *)chunk)+chunk->size+HSZ;
+        
+        remain->size = 1024 - (chunk->size+HSZ);
+        remain->magic = FREE;
+
+        if (head == NULL) {
+            head = remain;
+            remain->prev = NULL;
+            remain->next = NULL;
+        } else {
+            // Add mo code
+        }
+        
         // printf("   -- %p\n", heap_start);
 
         // Create a node of (1024 - real) size bytes in size
         // make the node the head (if head == null)
-        printf("HEADER: %p\n", (void*)chunk+HSZ);
+        printf("[-] New Pointer: %p\n", (void*)chunk);
+        printf("[+] Left:        %p\n", remain);
+        printf("[+] Size:        %ld\n", remain->size);
         return (void *)chunk + HSZ;
 
     } else {
 
         // if node exists then check size of node and split if necessary.
         // return the fcking node.
+
+        printf("Node already exists.\n");
 
     }
 
@@ -127,6 +143,7 @@ void mem_audit() {
 
         // temp = temp + temp->size - HSZ;
         temp = (void *)temp + temp->size + HSZ;
+        printf("temp size: %p\n", temp);
     }
     printf("-------------------------------------\n\n");
 }
