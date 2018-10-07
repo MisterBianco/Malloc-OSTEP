@@ -1,2 +1,2 @@
 test:
-	gcc test.c mall.c
+	gcc test.c mall.c -g
