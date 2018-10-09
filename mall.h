@@ -32,8 +32,6 @@ struct __node_t {
 
 } node;
 
-// No point in changing the packing of this object no
-// performance or memory gain is achieved.
 struct __header_t {
 
     size_t size;
@@ -44,9 +42,13 @@ struct __header_t {
 static struct __node_t* head = NULL;
 
 static void* heap_start = NULL;
+static unsigned int pages = 0;
 
 void* mmalloc(const size_t bytes);
 void mfree(const void* ptr);
+
+void add_node(struct __node_t* nd);
+void remove_node(struct __node_t* nd);
 
 void mem_audit();
 void __walk_free();
