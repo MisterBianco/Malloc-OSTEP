@@ -13,46 +13,46 @@
 #define B  "\x1B[34m"
 #define M  "\x1B[35m"
 #define C  "\x1B[36m"
-#define Wh  "\x1B[37m"
+#define Wh "\x1B[37m"
 
-#define WORDSZ 8
+#define HEADSZ sizeof(struct __header_t)
 #define PAGESZ getpagesize()
+#define WORDSZ 8
 
 #define FREE    0xbaaaaaad
 #define NONFREE 0xdeaddead
 
-#define HSZ sizeof(struct __header_t)
-#define NSZ sizeof(struct __node_t)
+typedef struct __node_t* NODEPTR;
+typedef struct __header_t* HEADERPTR;
 
 struct __node_t {
     size_t size;
     unsigned int magic;
 
     struct __node_t* next;
-
-} node;
+};
 
 struct __header_t {
-
     size_t size;
     unsigned int magic;
+};
 
-} header;
-
-static struct __node_t* head = NULL;
+static NODEPTR head = NULL;
 
 static void* heap_start = NULL;
 static unsigned int pages = 0;
 
+// Functions
+
 void* mmalloc(const size_t bytes);
 void mfree(const void* ptr);
 
-void add_node(struct __node_t* nd);
-void remove_node(struct __node_t* nd);
+void addNodeToFreeList(struct __node_t* nd);
+void removeNodeFromFreeList(struct __node_t* nd);
 
-void mem_audit();
-void __walk_free();
+void mheap();
+void mfreewalk();
 
-struct __node_t* __find_free(size_t bytes);
+NODEPTR __getFree(size_t bytes);
 
 #endif
