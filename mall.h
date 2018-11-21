@@ -28,7 +28,6 @@ typedef struct __header_t* HEADERPTR;
 struct __node_t {
     size_t size;
     unsigned int magic;
-
     struct __node_t* next;
 };
 
@@ -41,8 +40,6 @@ static NODEPTR head = NULL;
 
 static void* heap_start = NULL;
 static unsigned int pages = 0;
-
-// Functions
 
 void* mmalloc(const size_t bytes);
 void mfree(const void* ptr);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "mall.h"
@@ -25,20 +26,23 @@ void* mmalloc(const size_t bytes) {
         pages += pginc;
 
         void* ptr;
+
         if ((ptr = sbrk(PAGESZ * pginc)) == (void*)(-1)) {
             fprintf(stderr, "[-] Couldn't allocate memory.\n");
             return NULL;
         }
 
-        HEADERPTR chunk = (HEADERPTR)ptr;
+        for (int i = 0; i < PAGESZ*pginc; i++) {
+            ((char *)(ptr))[i] = '\x00';
+        }
 
+        HEADERPTR chunk = (HEADERPTR)ptr;
         chunk->magic = NONFREE;
 
         if (((PAGESZ * pginc) - (real + HEADSZ)) < 24) {
             chunk->size = (PAGESZ * pginc);
 
         } else {
-
             chunk->size = real;
 
             NODEPTR remain = ((void *)chunk)+chunk->size+HEADSZ;
@@ -65,7 +69,6 @@ void* mmalloc(const size_t bytes) {
         removeNodeFromFreeList(chunk);
 
     } else {
-
         NODEPTR remain = (void*)retptr + retptr->size + HEADSZ;
         remain->size = rsz - (real + HEADSZ);
         remain->magic = FREE;
@@ -95,6 +98,11 @@ void coalesce() {
 
                 pre = remain;
                 remain->next = temp->next;
+
+                temp->magic = 0;
+                temp->size = 0;
+                temp->next = NULL;
+
                 temp = remain->next;
 
                 if (remain->size + HEADSZ == pages * PAGESZ) {
@@ -103,6 +111,7 @@ void coalesce() {
                         printf("[-] Failed to return memory to OS");
                     }
                     head = NULL;
+                    heap_start = NULL;
                     pages = 0;
                 }
                 continue;
@@ -125,16 +134,13 @@ void addNodeToFreeList(NODEPTR nd) {
     while (temp != NULL) {
 
         if (pre == NULL && temp > nd) {
-            printf("1\n");
             nd->next = head;
             head=nd;
             pre = nd;
         } else if (pre < nd && temp > nd) {
-            printf("2\n");
             pre->next = nd;
             nd->next = temp;
         } else if (temp < nd && temp->next == NULL) {
-            printf("4\n");
             temp->next = nd;
             nd->next = NULL;
         }
@@ -210,6 +216,7 @@ void mfreewalk() {
         printf("{ %p [%ld] }-->", temp, temp->size + HEADSZ);
         temp = temp->next;
     }
+    printf("\n");
 }
 
 void mheap() {
@@ -235,14 +242,10 @@ void mheap() {
 
         for (int i = 0; i < temp->size + HEADSZ; ++i) {
             if (i % 32 == 0)
-                printf("\n\t");
+                printf("\n");
 
             unsigned int hx = ((u_int8_t *)(temp))[i];
-            if (hx != 0)
-                printf("%s", P);
-            else
-                printf("%s", E);
-            printf("  %02x", hx);
+            hx != 0 ? printf("%s  %02x", P, hx) : printf("%s  %02x", E, hx);
         }
         printf("\n\n\n");
 
@@ -252,5 +255,5 @@ void mheap() {
         }
 
     }
-    printf("-------------------------------------\n\n");
+    printf("%s-------------------------------------\n\n", E);
 }
